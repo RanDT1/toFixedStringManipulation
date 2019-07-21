@@ -1,0 +1,74 @@
+<script src="tinytest.js"></script>
+<script>
+
+ function toFixedString(value, precision) {
+   var valueAsString = value + '';
+   var arrayOfStringDigits = valueAsString.match(/./g);
+
+   for(var i = 0; i < precision; i++) {
+     var indexOfDecimal = arrayOfStringDigits.indexOf('.');
+     if(indexOfDecimal === -1) {
+       arrayOfStringDigits[arrayOfStringDigits.length] = '.';
+       indexOfDecimal = arrayOfStringDigits.indexOf('.');
+     }
+     var temp = arrayOfStringDigits[indexOfDecimal];
+     if(arrayOfStringDigits[indexOfDecimal + 1] === undefined) {
+       arrayOfStringDigits[indexOfDecimal + 1] = '0';
+     }
+     arrayOfStringDigits[indexOfDecimal] = arrayOfStringDigits[indexOfDecimal + 1];
+     arrayOfStringDigits[indexOfDecimal + 1] = temp;
+   }
+
+   var valueAsNumber = Number(arrayOfStringDigits.join(''));
+   var roundedValue = valueAsNumber.toFixed();
+   arrayOfStringDigits = roundedValue.match(/./g);
+   arrayOfStringDigits[arrayOfStringDigits.length] = '.';
+
+   for(var i = 0; i < precision; i++) {
+     var indexOfDecimal = arrayOfStringDigits.indexOf('.');
+     var temp = arrayOfStringDigits[indexOfDecimal];
+     if(arrayOfStringDigits[indexOfDecimal - 1] === undefined) {
+       arrayOfStringDigits.unshift('0');
+       indexOfDecimal++;
+     }
+     arrayOfStringDigits[indexOfDecimal] = arrayOfStringDigits[indexOfDecimal - 1];
+     arrayOfStringDigits[indexOfDecimal - 1] = temp;
+   }
+   var returnValue = Number(arrayOfStringDigits.join(''));
+   return returnValue.toFixed(precision);
+ };
+
+
+tests({
+  'it should round the value 1.005 upto 1.01 if precison is 2':function() {
+    var roundedString = toFixedString(1.005, 2);
+    eq(roundedString, '1.01');
+  },
+
+  'it should round the value 0.615 upto 0.62 if precison is 2':function() {
+    var roundedString = toFixedString(0.615, 2);
+    eq(roundedString, '0.62');
+  },
+
+  'it should round the value 10.235 upto 10.24 if precison is 2':function() {
+    var roundedString = toFixedString(10.235, 2);
+    eq(roundedString, '10.24');
+  },
+
+  'if value is an integer and precison is greater than 1, it should place a decimal following the integer and pad with 0s based on precison ':function() {
+    var roundedString = toFixedString(10, 2);
+    eq(roundedString, '10.00');
+  },
+
+  'if precison is greater than the values length, it should pad the value with zeros as necessary ':function() {
+    var roundedString = toFixedString(10, 4);
+    eq(roundedString, '10.0000');
+  },
+
+  'it should round the value .005 upto 0.01 if precison is 2':function() {
+    var roundedString = toFixedString(.005, 2);
+    eq(roundedString, '0.01');
+  },
+
+});
+</script>
